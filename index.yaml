@@ -9,5 +9,5 @@ entries:
     name: generic-app
     urls:
     - https://yasahmed.github.io/generic-helm-chart/generic-app-0.1.3.tgz
-    version: 0.1.3
+    version: 0.1.0
 generated: "2025-05-19T22:00:50.197563547Z"
