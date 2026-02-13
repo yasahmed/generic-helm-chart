@@ -24,6 +24,7 @@ spec:
       containers:
       - name: presync-hook-container
         image: quay.io/skopeo/stable:latest
+        
         command:
           - sh
           - -c
