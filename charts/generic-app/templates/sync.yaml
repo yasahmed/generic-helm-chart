@@ -24,6 +24,19 @@ spec:
         command:
           - sh
           - -c
-          - echo "Hello world !!!"
+          - |
+            #!/bin/sh
+            set -e
+            
+            SOURCE_IMAGE="{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            TARGET_REGISTRY="toto.cpù"
+            IMAGE_NAME=$(echo $SOURCE_IMAGE | awk -F'/' '{print $NF}')
+            TARGET_IMAGE="${TARGET_REGISTRY}/${IMAGE_NAME}"
+            
+            echo "========================================="
+            echo "Source Image: ${SOURCE_IMAGE}"
+            echo "Target Image: ${TARGET_IMAGE}"
+            echo "========================================="
+            
   backoffLimit: 3
 {{- end }}
