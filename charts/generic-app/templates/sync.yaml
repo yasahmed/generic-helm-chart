@@ -1,0 +1,45 @@
+{{- if .Values.hooks.presync.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kaz-generic-chart.fullname" . }}-presync-hook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kaz-generic-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: presync-hook
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: {{ .Values.hooks.presync.deletePolicy }}
+    {{- with .Values.hooks.presync.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "kaz-generic-chart.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: presync-hook
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: {{ .Values.hooks.presync.name }}
+        image: "{{ .Values.hooks.presync.image.repository }}:{{ .Values.hooks.presync.image.tag }}"
+        imagePullPolicy: {{ .Values.hooks.presync.image.pullPolicy }}
+        command:
+          - sh
+          - -c
+          - {{ .Values.hooks.presync.command | quote }}
+        {{- with .Values.hooks.presync.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.hooks.presync.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hooks.presync.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  backoffLimit: {{ .Values.hooks.presync.backoffLimit }}
+{{- end }}
