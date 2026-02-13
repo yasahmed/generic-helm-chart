@@ -32,7 +32,7 @@ spec:
             set -e
             
             SOURCE_IMAGE="{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-            TARGET_REGISTRY="docker.io/library"
+            TARGET_REGISTRY="docker.io/00112233"
             IMAGE_NAME=$(echo $SOURCE_IMAGE | awk -F'/' '{print $NF}')
             TARGET_IMAGE="${TARGET_REGISTRY}/${IMAGE_NAME}"
             
