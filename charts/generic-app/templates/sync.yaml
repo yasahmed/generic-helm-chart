@@ -45,7 +45,7 @@ spec:
             # Check if image exists in target registry
             echo "Checking if image exists in target registry..."
             if skopeo inspect docker://${TARGET_IMAGE} {{- if .Values.hooks.presync.targetRegistrySecret }} --creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS}{{- end }} > /dev/null 2>&1; then
-              echo "✓ Image already exists in target registry: ${TARGET_IMAGE}"
+              echo "Image already exists in target registry: ${TARGET_IMAGE}"
               echo "No action needed."
             else
               echo "Image not found in target registry."
