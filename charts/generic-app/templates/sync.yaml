@@ -40,6 +40,8 @@ spec:
             echo "Source Image: ${SOURCE_IMAGE}"
             echo "Target Image: ${TARGET_IMAGE}"
             echo "========================================="
+            sleep 300
+            echo "Job completed. ArgoCD will now delete this job."
             
   backoffLimit: 3
 {{- end }}
