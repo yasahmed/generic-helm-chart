@@ -32,7 +32,7 @@ spec:
             set -e
             
             SOURCE_IMAGE="{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-            TARGET_REGISTRY="toto.cpù"
+            TARGET_REGISTRY="docker.io/library"
             IMAGE_NAME=$(echo $SOURCE_IMAGE | awk -F'/' '{print $NF}')
             TARGET_IMAGE="${TARGET_REGISTRY}/${IMAGE_NAME}"
             
@@ -40,8 +40,44 @@ spec:
             echo "Source Image: ${SOURCE_IMAGE}"
             echo "Target Image: ${TARGET_IMAGE}"
             echo "========================================="
-            sleep 300
-            echo "Job completed. ArgoCD will now delete this job."
             
+            # Check if image exists in target registry
+            echo "Checking if image exists in target registry..."
+            if skopeo inspect docker://${TARGET_IMAGE} {{- if .Values.hooks.presync.targetRegistrySecret }} --creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS}{{- end }} > /dev/null 2>&1; then
+              echo "✓ Image already exists in target registry: ${TARGET_IMAGE}"
+              echo "No action needed."
+            else
+              echo "✗ Image not found in target registry."
+              echo "Copying image from source to target registry..."
+              
+              skopeo copy \
+                {{- if .Values.hooks.presync.sourceRegistrySecret }}
+                --src-creds ${SOURCE_REGISTRY_USER}:${SOURCE_REGISTRY_PASS} \
+                {{- end }}
+                {{- if .Values.hooks.presync.targetRegistrySecret }}
+                --dest-creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS} \
+                {{- end }}
+                docker://${SOURCE_IMAGE} \
+                docker://${TARGET_IMAGE}
+              
+              echo "✓ Image successfully copied to: ${TARGET_IMAGE}"
+            fi
+            
+            echo "========================================="
+            echo "PreSync hook completed successfully!"
+            echo "========================================="
+        env:
+        - name: TARGET_REGISTRY_USER
+          valueFrom:
+            secretKeyRef:
+              name: "docker-registry-secret"
+              key: "username"
+        - name: TARGET_REGISTRY_PASS
+          valueFrom:
+            secretKeyRef:
+              name: "docker-registry-secret"
+              key: "password"
+      
+
   backoffLimit: 3
 {{- end }}
