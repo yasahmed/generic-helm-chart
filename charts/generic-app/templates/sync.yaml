@@ -51,9 +51,6 @@ spec:
               echo "Copying image from source to target registry..."
               
               skopeo copy \
-                {{- if .Values.hooks.presync.sourceRegistrySecret }}
-                --src-creds ${SOURCE_REGISTRY_USER}:${SOURCE_REGISTRY_PASS} \
-                {{- end }}
                 {{- if .Values.hooks.presync.targetRegistrySecret }}
                 --dest-creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS} \
                 {{- end }}
