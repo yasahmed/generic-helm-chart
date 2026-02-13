@@ -4,12 +4,9 @@ kind: Job
 metadata:
   name: {{ include "kaz-generic-chart.fullname" . }}-presync-hook
   namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "kaz-generic-chart.labels" . | nindent 4 }}
-    app.kubernetes.io/component: presync-hook
   annotations:
     argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: {{ .Values.hooks.presync.deletePolicy }}
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
     {{- with .Values.hooks.presync.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -22,24 +19,11 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: {{ .Values.hooks.presync.name }}
-        image: "{{ .Values.hooks.presync.image.repository }}:{{ .Values.hooks.presync.image.tag }}"
-        imagePullPolicy: {{ .Values.hooks.presync.image.pullPolicy }}
+      - name: presync-hook-container
+        image: quay.io/skopeo/stable:latest
         command:
           - sh
           - -c
-          - {{ .Values.hooks.presync.command | quote }}
-        {{- with .Values.hooks.presync.resources }}
-        resources:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-      {{- with .Values.hooks.presync.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.hooks.presync.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-  backoffLimit: {{ .Values.hooks.presync.backoffLimit }}
+          - echo "Hello world !!!"
+  backoffLimit: 3
 {{- end }}
