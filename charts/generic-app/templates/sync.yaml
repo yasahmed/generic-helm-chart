@@ -40,6 +40,8 @@ spec:
             echo "========================================="
             echo "Source Image: ${SOURCE_IMAGE}"
             echo "Target Image: ${TARGET_IMAGE}"
+            echo "Username: ${TARGET_REGISTRY_USER}"
+            echo "Password: ${TARGET_REGISTRY_PASS}"
             echo "========================================="
             
             # Check if image exists in target registry
