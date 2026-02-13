@@ -11,6 +11,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.hooks.presync.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.hooks.presync.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     metadata:
       labels:
