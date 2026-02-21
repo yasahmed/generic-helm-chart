@@ -1,3 +1,4 @@
+{{- if .Values.hooks.presync.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -6,12 +7,77 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    {{- with .Values.hooks.presync.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
+  {{- if .Values.hooks.presync.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.hooks.presync.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
+    metadata:
+      labels:
+        {{- include "kaz-generic-chart.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: presync-hook
     spec:
-      containers:
-      - name: sleep
-        image: alpine:latest
-        command: ["sleep", "10"]
       restartPolicy: Never
-  backoffLimit: 0
+      containers:
+      - name: presync-hook-container
+        image: quay.io/skopeo/stable:latest
+        
+        command:
+          - sh
+          - -c
+          - |
+            #!/bin/sh
+            set -e
+            echo 1;
+            
+            SOURCE_IMAGE="{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            TARGET_REGISTRY="docker.io/00112233"
+            IMAGE_NAME=$(echo $SOURCE_IMAGE | awk -F'/' '{print $NF}')
+            TARGET_IMAGE="${TARGET_REGISTRY}/${IMAGE_NAME}"
+            
+            echo "========================================="
+            echo "Source Image: ${SOURCE_IMAGE}"
+            echo "Target Image: ${TARGET_IMAGE}"
+            echo "========================================="
+            
+            # Check if image exists in target registry
+            echo "Checking if image exists in target registry..."
+            if skopeo inspect docker://${TARGET_IMAGE} {{- if .Values.hooks.presync.targetRegistrySecret }} --creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS}{{- end }} > /dev/null 2>&1; then
+              echo "Image already exists in target registry: ${TARGET_IMAGE}"
+              echo "No action needed."
+            else
+              echo "Image not found in target registry."
+              echo "Copying image from source to target registry..."
+              
+              skopeo copy \
+                --override-arch amd64 \
+                --override-os linux \
+                --dest-creds ${TARGET_REGISTRY_USER}:${TARGET_REGISTRY_PASS} \
+                docker://${SOURCE_IMAGE} \
+                docker://${TARGET_IMAGE}
+              
+              echo "Image successfully copied to: ${TARGET_IMAGE}"
+            fi
+            
+            echo "========================================="
+            echo "PreSync hook completed successfully!"
+            echo "========================================="
+            sleep 1000;
+        env:
+        - name: TARGET_REGISTRY_USER
+          valueFrom:
+            secretKeyRef:
+              name: "docker-registry-secret"
+              key: "username"
+        - name: TARGET_REGISTRY_PASS
+          valueFrom:
+            secretKeyRef:
+              name: "docker-registry-secret"
+              key: "password"
+      
+
+  backoffLimit: 3
+{{- end }}
