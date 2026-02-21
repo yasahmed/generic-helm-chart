@@ -20,6 +20,10 @@ spec:
         {{- include "kaz-generic-chart.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: presync-hook
     spec:
+      containers:
+      - name: sleep
+        image: alpine:latest
+        command: ["sleep", "50"]
       restartPolicy: Never
       containers:
       - name: presync-hook-container
