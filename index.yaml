@@ -3,11 +3,11 @@ entries:
   generic-app:
   - apiVersion: v2
     appVersion: "1.0"
-    created: "2026-02-21T23:59:01.96923466Z"
+    created: "2026-02-22T00:02:34.250006115Z"
     description: A generic Helm chart for Kubernetes apps
-    digest: 5cdec03b49084fe1cdd4534ddf8360d465ff8c21af9ae61e737feba1bf4c0aa3
+    digest: 6ce05f25834d3af652aa7c907c56b8f682a6ccb34ca6b61a5eb51aea1244a1f0
     name: generic-app
     urls:
-    - https://yasahmed.github.io/generic-helm-chart/generic-app-0.1.26.tgz
-    version: 0.1.26
-generated: "2026-02-21T23:59:01.968681359Z"
+    - https://yasahmed.github.io/generic-helm-chart/generic-app-0.1.27.tgz
+    version: 0.1.27
+generated: "2026-02-22T00:02:34.249384244Z"
